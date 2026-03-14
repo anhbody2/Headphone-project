@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('phone_number');
             $table->text('address');
             $table->timestamp('created_at')->useCurrent();
-$table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->softDeletes();
         });

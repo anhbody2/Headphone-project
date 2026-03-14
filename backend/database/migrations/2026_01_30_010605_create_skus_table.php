@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->integer('stock')->default(0);
             $table->integer('buyturn')->default(0);
+            $table->json('img')->nullable();
             $table->decimal('price', 12, 2);
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->timestamps();

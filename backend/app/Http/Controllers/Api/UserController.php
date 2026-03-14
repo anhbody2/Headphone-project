@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-
+use Symfony\Component\Console\Output\ConsoleOutput;
+use App\Models\Cart;
 class UserController extends Controller
 {
     /**
@@ -46,8 +48,47 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::findOrFail($id);
+        $orders = Order::where('user_id', $user->id)->get();
 
-        return response()->json($user);
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'user' => $user,
+                'orders' => $orders,
+            ],
+        ]);
+    }
+    public function me()
+    {
+        $user = auth('api')->user();
+        $orders = Order::with('items.sku')->where('user_id', $user->id)->get();
+        $cart = Cart::firstOrCreate([
+            'user_id' => $user->id
+        ]);
+        $items = $cart->items->map(fn($item) => [
+            'id'       => $item->id,
+            'sku_id'   => $item->sku_id,
+            'product_id' => $item->product_id,
+            'name'     => $item->sku->name,
+            'price'    => $item->sku->price,
+            'quantity' => $item->quantity,
+            'subtotal' => $item->quantity * $item->sku->price,
+            'image'    => $item->sku->img[0] ?? null,
+        ]);
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+        return response()->json([
+            'auth'  => true,
+            'id'    => $user->id,
+            'name'  => $user->user_name,
+            'email' => $user->email,
+            'role'  => $user->role,
+            'data' => [
+                'orders' => $orders,
+                'cart' => $items,
+            ],
+        ]);
     }
 
     /**
@@ -75,7 +116,6 @@ class UserController extends Controller
 
         return response()->json($user);
     }
-
     /**
      * DELETE /api/users/{id}
      */
