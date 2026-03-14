@@ -12,9 +12,28 @@ class ProductController extends Controller
     // GET /api/products
     public function index()
     {
-        return response()->json([
-            'data' => Product::latest()->get()
-        ], Response::HTTP_OK);
+        return Product::with([
+            'skus.values.option'
+        ])
+            ->whereNull('deleted_at')
+            ->get()
+            ->map(fn($product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'description' => $product->description,
+                'skus' => $product->skus->map(fn($sku) => [
+                    'id' => $sku->id,
+                    'name' => $sku->name,
+                    'price' => $sku->price,
+                    'promotion' =>$sku->promotion,
+                    'img' => $sku->img,
+                    'stock' => $sku->stock,
+                    'buyturn' => $sku->buyturn,
+                    'options' => $sku->values->mapWithKeys(fn($v) => [
+                        $v->option->name => $v->value
+                    ])
+                ])
+            ]);
     }
 
     // GET /api/products/{id}
@@ -32,8 +51,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name'  => 'required|string|max:255',
-            'sku'   => 'required|string|max:100|unique:products,sku',
-            'price' => 'required|numeric|min:0',
+            'description' => 'required|string',
         ]);
 
         $product = Product::create($validated);
@@ -47,14 +65,19 @@ class ProductController extends Controller
     // PUT /api/products/{id}
     public function update(Request $request, $id)
     {
+
         $product = Product::findOrFail($id);
-
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Product not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
         $validated = $request->validate([
-            'name'  => 'sometimes|required|string|max:255',
-            'sku'   => 'sometimes|required|string|max:100|unique:products,sku,' . $id,
-            'price' => 'sometimes|required|numeric|min:0',
+            'name'  => 'required|string|max:255',
+            'description' => 'required|string',
         ]);
-
+        
         $product->update($validated);
 
         return response()->json([
@@ -66,11 +89,17 @@ class ProductController extends Controller
     // DELETE /api/products/{id}
     public function destroy($id)
     {
-        Product::destroy($id);
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Product not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
 
+        $product->delete();
         return response()->json([
             'message' => 'Product deleted'
         ], Response::HTTP_NO_CONTENT);
     }
 }
-

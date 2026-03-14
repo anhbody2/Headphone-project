@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Sku;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\Product;
+use Illuminate\Support\Facades\Validator;
 
 class SkuController extends Controller
 {
@@ -30,19 +32,30 @@ class SkuController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'sku_code'   => 'required|string|unique:skus,sku_code',
+            'product_id' => 'required|integer',
+            'name'       => 'required|string|unique:skus,name',
             'price'      => 'required|numeric|min:0',
+            'promotion'  => 'required|numeric|min:0',   
+            'img'        => 'nullable|array',
             'stock'      => 'required|integer|min:0',
-            'status'     => 'nullable|boolean',
         ]);
+
+        // Explicit check for product existence
+        $product = Product::find($validated['product_id']);
+
+        if (!$product) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Product not existed'
+            ], Response::HTTP_NOT_FOUND);
+        }
 
         $sku = Sku::create($validated);
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'SKU created successfully',
-            'data' => $sku
+            'data'    => $sku
         ], Response::HTTP_CREATED);
     }
 
@@ -50,27 +63,31 @@ class SkuController extends Controller
      * GET /api/skus/{id}
      * Show SKU detail
      */
-    public function show($id)
+    public function show($keyword)
     {
-        $sku = Sku::with(['product', 'values'])->find($id);
+        $skus = Sku::with(['product', 'values'])
+            ->where('name', 'LIKE', '%' . $keyword . '%')
+            ->get();
 
-        if (!$sku) {
+        if ($skus->isEmpty()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'SKU not found'
+                'message' => 'No SKUs found matching that product name'
             ], Response::HTTP_NOT_FOUND);
         }
 
         return response()->json([
             'status' => 'success',
-            'data' => $sku
+            'count'  => $skus->count(),
+            'data'   => $skus
         ], Response::HTTP_OK);
     }
-
     /**
      * PUT /api/skus/{id}
      * Update SKU
      */
+
+
     public function update(Request $request, $id)
     {
         $sku = Sku::find($id);
@@ -82,15 +99,26 @@ class SkuController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $validated = $request->validate([
+        // 1. Manually create the validator
+        $validator = Validator::make($request->all(), [
             'product_id' => 'sometimes|exists:products,id',
-            'sku_code'   => 'sometimes|string|unique:skus,sku_code,' . $sku->id,
+            'name'       => 'sometimes|string|unique:skus,name,' . $sku->id,
             'price'      => 'sometimes|numeric|min:0',
+            'promotion'  => 'required|numeric|min:0',   
             'stock'      => 'sometimes|integer|min:0',
+            'img'        => 'nullable|array',
             'status'     => 'nullable|boolean',
         ]);
 
-        $sku->update($validated);
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $validator->errors()->first()
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        // 3. Update using validated data
+        $sku->update($validator->validated());
 
         return response()->json([
             'status' => 'success',
@@ -115,7 +143,6 @@ class SkuController extends Controller
         }
 
         $sku->delete();
-
         return response()->json([
             'status' => 'success',
             'message' => 'SKU deleted successfully'
