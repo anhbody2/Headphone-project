@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('buyturn')->default(0);
             $table->json('img')->nullable();
             $table->decimal('price', 12, 2);
+            $table->decimal('promotion', 5, 2)->default(0);
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();

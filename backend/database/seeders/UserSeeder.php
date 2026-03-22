@@ -15,19 +15,16 @@ class UserSeeder extends Seeder
                 'id' => 1,
                 'user_name' => 'Admin',
                 'email' => 'admin@example.com',
-                'password' => '$2y$10$examplehash',
+                'password' => bcrypt('password'),
                 'role' => 'admin',
-                'image' => null,
             ],
             [
-                'id' => 2,
-                'user_name' => 'John Doe',
-                'email' => 'john@example.com',
-                'password' => '$2y$10$examplehash',
+                'id' => 24,
+                'user_name' => 'Poob',
+                'email' => 'Poob@gmail.com',
+                'password' => bcrypt('password'),
                 'role' => 'user',
-                'image' => null,
-            ],
+            ]
         ]);
     }
 }
-

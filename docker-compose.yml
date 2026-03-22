@@ -18,7 +18,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./backend:/var/www
+      - ./backend:/var/www:delegated
       - ./backend/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend-app
