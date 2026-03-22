@@ -18,9 +18,9 @@ return new class extends Migration
             $table->foreignId('sku_id')->constrained('skus')->cascadeOnDelete();
             $table->decimal('price', 12, 2);
             $table->integer('quantity');
-           $table->timestamp('created_at')->useCurrent();
-$table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
-
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+ 
             $table->softDeletes();
         });
     }
