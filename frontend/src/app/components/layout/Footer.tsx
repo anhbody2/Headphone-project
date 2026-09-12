@@ -3,9 +3,9 @@ import { Input } from '../ui/input';
 
 export function Footer() {
   return (
-    <footer className="bg-black text-white">
+    <footer className="bg-black text-white ">
       {/* Newsletter Section */}
-      <div className="border-b border-gray-800">
+      <div className="border-b border-gray-800 ">
         <div className="container mx-auto px-4 py-16 text-center">
           <h2 className="text-3xl mb-4">SIGN UP FOR NEW UPDATES</h2>
           <p className="text-gray-400 max-w-2xl mx-auto mb-8">
@@ -75,7 +75,7 @@ export function Footer() {
       {/* Brand Name Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
-          <h1 className="text-9xl tracking-widest opacity-50 font-serif font-bold">SONY</h1>
+          <h1 className="text-7xl md:text-9xl  tracking-widest opacity-50 font-serif font-bold">SONY</h1>
         </div>
       </div>
 

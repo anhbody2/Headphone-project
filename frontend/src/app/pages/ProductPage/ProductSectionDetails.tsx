@@ -15,7 +15,6 @@ export function ProductDetails({
   const hasPromotion = discountPercentage > 0;
   const originalPrice = Number(selectedSku.price);
 
-  // 2. Calculate the discounted price (After)
   const discountedPrice = originalPrice * (1 - discountPercentage / 100);
 
   const handleSelectSku = (sku: any) => {
@@ -36,7 +35,9 @@ export function ProductDetails({
   };
 
   const handleAddToCart = () => {
+    
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    console.log(Array.isArray(cart));
     const existing = cart.find((i: any) => i.sku_id === selectedSku.id);
 
     // Use the discounted price if it exists, otherwise use original
@@ -56,9 +57,8 @@ export function ProductDetails({
         subtotal: quantity * finalPrice,
       });
     }
-
     localStorage.setItem("cart", JSON.stringify(cart));
-    toast.success("Added to cart!");
+    toast.success("Added to cart!");  
   };
 
 
