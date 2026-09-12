@@ -20,17 +20,21 @@ export function CartPage() {
 
 
   useEffect(() => {
-    if (!user) return;
 
     const syncCart = async () => {
       setLoading(true);
       try {
         if (user) {
+          const res = await bootstrapCart(user);
+          setItems(res || []);
+
           localStorage.removeItem("cart");
-          localStorage.removeItem("cart.items");
+        } else {
+          const localData = localStorage.getItem("cart");
+          const guestCart = localData ? JSON.parse(localData) : [];
+          setItems(guestCart);
+          console.log("Loaded Guest Cart from LS:", guestCart);
         }
-        const res = await bootstrapCart(user);
-        setItems(res || []);
       } finally {
         setLoading(false);
       }
@@ -74,6 +78,9 @@ export function CartPage() {
           }
         }
       }
+    } else {
+      localStorage.setItem("cart", JSON.stringify(newItems));
+      console.log("Item removed. New Guest Cart:", newItems);
     }
 
     window.dispatchEvent(new Event("cartUpdated"));

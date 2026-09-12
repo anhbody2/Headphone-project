@@ -25,7 +25,7 @@ export default function PaymentPage() {
           localStorage.removeItem("cart.items");
         }
         const res = await bootstrapCart(user);
-        setItems(res.items);
+        setItems(res || []);
         setTotal(res.total);
       } catch (error) {
         console.error("Failed to load cart", error);

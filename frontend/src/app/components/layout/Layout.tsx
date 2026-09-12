@@ -17,14 +17,14 @@ export function Layout() {
   }, [hasBanner]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full overflow-x-hidden">
       <AuthProvider>
       <SearchProvider>
         <ScrollToTop />
         <SearchOverlay />
         <Header isTransparent={hasBanner && isBannerVisible} />
 
-        <main className="flex-1 min-h-[calc(100vh-120px)]">
+        <main className="flex-1 w-full overflow-x-hidden">
           <Outlet context={{ setIsBannerVisible }} />
         </main>
 

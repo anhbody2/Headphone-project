@@ -12,7 +12,7 @@ type PaymentMethod = "paypal" | "card" | "gpay";
 
 export default function PaymentForm({ onOrderSuccess }: { onOrderSuccess?: () => void }) {
     const [method, setMethod] = useState<PaymentMethod>("card");
-    const [items, setItems] = useState<any>({ items: [], total: 0.0 });
+    const [items, setItems] = useState<{ items: any[]; total: number }>({ items: [], total: 0 });;
     const { user, authReady } = useAuth();
     const navigator = useNavigate();
     // Fetch items on mount
